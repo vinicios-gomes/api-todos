@@ -9,7 +9,6 @@ app.use(cors());
 app.use(express.json());
 
 const users = [];
-const todos = [];
 
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
@@ -39,10 +38,12 @@ app.post("/users", (request, response) => {
 });
 
 app.get("/todos", checksExistsUserAccount, (request, response) => {
-  return response.status(200).json(todos);
+  const { user } = request;
+  return response.status(200).json(user.todos);
 });
 
 app.post("/todos", checksExistsUserAccount, (request, response) => {
+  const { user } = request;
   const { title, deadline } = request.body;
 
   const createTodoOperation = {
@@ -52,7 +53,7 @@ app.post("/todos", checksExistsUserAccount, (request, response) => {
     deadline: new Date(deadline),
     created_at: new Date(),
   };
-  todos.push(createTodoOperation);
+  user.todos.push(createTodoOperation);
 
   return response.status(201).json(createTodoOperation);
 });
@@ -66,7 +67,18 @@ app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
 });
 
 app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+  const { id } = request.params;
+
+  const todoIndex = user.todos.findIndex((todo) => todo.id === id);
+
+  if (todoIndex === -1) {
+    return response.status(404).json({ error: "Todo not found" });
+  }
+
+  user.todos.splice(todoIndex, 1);
+
+  return response.status(204).send();
 });
 
 module.exports = app;
