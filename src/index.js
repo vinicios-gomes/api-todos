@@ -39,7 +39,7 @@ app.post("/users", (request, response) => {
 });
 
 app.get("/todos", checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  return response.status(200).json(todos);
 });
 
 app.post("/todos", checksExistsUserAccount, (request, response) => {
